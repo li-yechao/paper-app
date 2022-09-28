@@ -2,15 +2,26 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paper/common/config.dart';
+import 'package:paper/graphql/use_graphql_client.dart';
 import 'package:paper/screens/auth/auth_screen.dart';
 import 'package:paper/screens/home/home_screen.dart';
+import 'package:paper/state/auth.dart';
 
-class IosApp extends StatelessWidget {
+class IosApp extends HookConsumerWidget {
   const IosApp({Key? key}) : super(key: key);
 
   @override
-  Widget build(context) {
+  Widget build(context, ref) {
+    final client = useGraphQLClient();
+
+    useEffect(() {
+      ref.read(authStateProvider.notifier).refresh(client);
+      return null;
+    }, []);
+
     return MediaQuery.fromWindow(
       child: CupertinoApp.router(
         routerDelegate: MyRouterDelegate(),
