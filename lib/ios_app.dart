@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:paper/common/config.dart';
+import 'package:paper/screens/auth/auth_screen.dart';
 import 'package:paper/screens/home/home_screen.dart';
 
 class IosApp extends StatelessWidget {
@@ -34,6 +36,21 @@ class MyRouterDelegate extends RouterDelegate<String>
 
   @override
   Future<void> setInitialRoutePath(String configuration) {
+    final uri = Uri.parse(configuration);
+    if (uri.path == Config.githubRedirectUri.path) {
+      final code = uri.queryParameters['code'];
+      if (code?.isNotEmpty == true) {
+        _stack.add(
+          RouteConfigure(
+            screen: () => AuthScreen(
+              code: code,
+            ),
+          ),
+        );
+        notifyListeners();
+      }
+    }
+
     return SynchronousFuture(null);
   }
 

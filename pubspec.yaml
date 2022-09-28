@@ -12,6 +12,12 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.2
+  flutter_hooks: ^0.18.5+1
+  hooks_riverpod: ^2.0.0-dev.9
+  graphql_flutter: ^5.1.0
+  shared_preferences: ^2.0.15
+  fluttertoast: ^8.0.9
+  js: ^0.6.4
 
 dev_dependencies:
   flutter_test:
