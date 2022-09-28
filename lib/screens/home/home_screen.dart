@@ -6,7 +6,8 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:paper/graphql/object.dart';
-import 'package:paper/screens/auth/auth_html.dart';
+import 'package:paper/ios_app.dart';
+import 'package:paper/screens/object/object_screen.dart';
 import 'package:paper/state/auth.dart';
 import 'package:paper/widgets/query_result_renderer.dart';
 import 'package:rxdart/rxdart.dart';
@@ -216,9 +217,14 @@ class _ObjectListState extends State<ObjectList> {
               child: CupertinoButton(
                 padding: EdgeInsets.zero,
                 onPressed: () {
-                  open(
-                    'https://paper.yechao.xyz/${widget.userId}/${item.node.id}',
-                    '_self',
+                  MyRouterDelegate.of(context).push(
+                    RouteConfigure(
+                      screen: () => ObjectScreen(
+                        objectId: item.node.id,
+                        title: item.node.meta?.title,
+                        previousPageTitle: 'Home',
+                      ),
+                    ),
                   );
                 },
                 child: Container(
