@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -48,13 +50,18 @@ class ObjectScreen extends HookConsumerWidget {
           controller: scrollController,
           child: SingleChildScrollView(
             controller: scrollController,
-            child: user != null
-                ? Editor(
-                    userId: user.id,
-                    objectId: objectId,
-                    changed: changed,
-                  )
-                : Container(),
+            child: Padding(
+              padding: EdgeInsets.only(
+                bottom: max(16.0, MediaQuery.of(context).padding.bottom),
+              ),
+              child: user != null
+                  ? Editor(
+                      userId: user.id,
+                      objectId: objectId,
+                      changed: changed,
+                    )
+                  : Container(),
+            ),
           ),
         ),
       ),

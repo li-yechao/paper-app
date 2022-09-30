@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -81,6 +82,11 @@ class HomeScreen extends HookConsumerWidget {
                   ),
                 ),
               ),
+            SliverPadding(
+              padding: EdgeInsets.only(
+                bottom: max(16.0, MediaQuery.of(context).padding.bottom),
+              ),
+            ),
           ],
         ),
       ),
