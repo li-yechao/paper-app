@@ -28,9 +28,14 @@ const AUTO_SAVE_TIMEOUT = 3e3
 export interface ObjectEditorProps {
   userId: string
   objectId: string
-  onStateChange?: (e: { changed: boolean; updatedAt: string; title: string }) => void
+  onStateChange?: (e: StateChangeEvent) => void
   onSizeChange?: (e: { width: number; height: number }) => void
 }
+
+export type StateChangeEvent =
+  | { type: 'changed'; changed: boolean }
+  | { type: 'saved'; updatedAt: string; title: string }
+  | { type: 'loaded' }
 
 export default function ObjectEditor({
   userId,
@@ -43,6 +48,12 @@ export default function ObjectEditor({
   }, [objectId])
 
   const object = useObject({ variables: { userId, objectId }, fetchPolicy: 'cache-and-network' })
+
+  useEffect(() => {
+    if (object.data) {
+      onStateChange?.({ type: 'loaded' })
+    }
+  }, [object.data])
 
   if (object.error) {
     throw object.error
@@ -64,7 +75,7 @@ const _ObjectEditor = ({
   object,
   onStateChange,
   onSizeChange,
-}: {
+}: Pick<ObjectEditorProps, 'onStateChange' | 'onSizeChange'> & {
   object: {
     id: string
     userId: string
@@ -72,8 +83,6 @@ const _ObjectEditor = ({
     meta?: { title?: string }
     updatedAt: string
   }
-  onStateChange?: (e: { changed: boolean; updatedAt: string; title: string }) => void
-  onSizeChange?: (e: { width: number; height: number }) => void
 }) => {
   const user = useViewer().data?.viewer
   const [updateObject] = useUpdateObject()
@@ -136,8 +145,12 @@ const _ObjectEditor = ({
   const autoSaveTimeout = useRef<number>()
 
   useEffect(() => {
-    onStateChange?.({ changed, updatedAt: object.updatedAt, title: object.meta?.title || '' })
-  }, [changed, object.updatedAt, object.meta?.title])
+    onStateChange?.({ type: 'changed', changed })
+  }, [changed])
+
+  useEffect(() => {
+    onStateChange?.({ type: 'saved', updatedAt: object.updatedAt, title: object.meta?.title || '' })
+  }, [object.updatedAt])
 
   useEffect(() => {
     if (autoSaveTimeout.current) {

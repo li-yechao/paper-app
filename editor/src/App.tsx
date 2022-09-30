@@ -2,27 +2,17 @@ import { ApolloProvider } from '@apollo/client'
 import { useMemo } from 'react'
 import { IntlProvider } from 'react-intl'
 import { createClient } from './apollo'
-import ObjectEditor from './ObjectEditor'
+import ObjectEditor, { ObjectEditorProps } from './ObjectEditor'
 
-export interface AppProps {
-  userId: string
-  objectId: string
-  onStateChange?: (e: { changed: boolean; updatedAt: string; title: string }) => void
-  onSizeChange?: (e: { width: number; height: number }) => void
-}
+export interface AppProps extends ObjectEditorProps {}
 
-export default function App({ userId, objectId, onStateChange, onSizeChange }: AppProps) {
+export default function App(props: AppProps) {
   const apolloClient = useMemo(() => createClient(), [])
 
   return (
     <ApolloProvider client={apolloClient}>
       <IntlProvider locale={navigator.language}>
-        <ObjectEditor
-          userId={userId}
-          objectId={objectId}
-          onStateChange={onStateChange}
-          onSizeChange={onSizeChange}
-        />
+        <ObjectEditor {...props} />
       </IntlProvider>
     </ApolloProvider>
   )

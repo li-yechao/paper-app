@@ -14,29 +14,28 @@
 
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App'
+import App, { AppProps } from './App'
 
-export interface EditorOptions {
-  userId: string
-  objectId: string
-  onStateChange?: (e: { changed: boolean; updatedAt: string }) => void
-  onSizeChange?: (e: { width: number; height: number }) => void
-}
+export interface EditorOptions extends AppProps {}
 
 export default class Editor {
-  static create(
-    container: HTMLElement,
-    { userId, objectId, onStateChange, onSizeChange }: EditorOptions
-  ) {
-    ReactDOM.createRoot(container).render(
+  static create(container: HTMLElement, options: EditorOptions): Editor {
+    return new Editor(container, options)
+  }
+
+  constructor(container: HTMLElement, options: EditorOptions) {
+    this.root = ReactDOM.createRoot(container)
+
+    this.root.render(
       <React.StrictMode>
-        <App
-          userId={userId}
-          objectId={objectId}
-          onStateChange={onStateChange}
-          onSizeChange={onSizeChange}
-        />
+        <App {...options} />
       </React.StrictMode>
     )
+  }
+
+  root: ReactDOM.Root
+
+  dispose() {
+    this.root.unmount()
   }
 }

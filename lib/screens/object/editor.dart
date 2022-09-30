@@ -6,11 +6,13 @@ class Editor extends StatelessWidget {
     required this.userId,
     required this.objectId,
     this.changed,
+    this.loaded,
   }) : super(key: key);
 
   final String userId;
   final String objectId;
   final ValueNotifier<bool?>? changed;
+  final ValueNotifier<bool>? loaded;
 
   @override
   Widget build(BuildContext context) {

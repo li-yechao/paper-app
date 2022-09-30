@@ -7,37 +7,32 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:js/js.dart';
 import 'package:js/js_util.dart';
 
-class Editor extends StatelessWidget {
+class Editor extends HookWidget {
   const Editor({
     Key? key,
     required this.userId,
     required this.objectId,
     this.changed,
+    this.loaded,
   }) : super(key: key);
 
   final String userId;
   final String objectId;
   final ValueNotifier<bool?>? changed;
+  final ValueNotifier<bool>? loaded;
 
   @override
   Widget build(BuildContext context) {
-    final future = ExternalLexicalEditorLoader.load();
+    final loader = useLoadEditor();
 
-    return FutureBuilder(
-      future: future,
-      builder: (context, snapshot) {
-        if (ExternalLexicalEditorLoader.isLoaded) {
-          return LexicalEditorRenderer(
+    return loader.hasData
+        ? LexicalEditorRenderer(
             userId: userId,
             objectId: objectId,
             changed: changed,
-          );
-        }
-        return const Center(
-          child: CupertinoActivityIndicator(),
-        );
-      },
-    );
+            loaded: loaded,
+          )
+        : Container();
   }
 }
 
@@ -47,11 +42,13 @@ class LexicalEditorRenderer extends HookWidget {
     required this.userId,
     required this.objectId,
     this.changed,
+    this.loaded,
   }) : super(key: key);
 
   final String userId;
   final String objectId;
   final ValueNotifier<bool?>? changed;
+  final ValueNotifier<bool>? loaded;
 
   @override
   Widget build(BuildContext context) {
@@ -59,36 +56,48 @@ class LexicalEditorRenderer extends HookWidget {
 
     final viewType = useMemoized(() {
       final now = DateTime.now().millisecondsSinceEpoch;
-      final viewType = 'lexical-editor-$now-$objectId';
+      return 'lexical-editor-$now-$objectId';
+    }, [userId, objectId]);
+
+    final editor = useMemoized(() {
+      final container = DivElement();
+
+      container.style
+        ..height = 'auto'
+        ..width = '100%'
+        ..overflow = 'hidden';
+
+      final editor = ExternalLexicalEditor.create(
+        container,
+        ExternalLexicalEditorOptions(
+          userId: userId,
+          objectId: objectId,
+          onStateChange: allowInterop((e) {
+            switch (getProperty(e, 'type')) {
+              case 'changed':
+                changed?.value = getProperty(e, 'changed');
+                break;
+              case 'loaded':
+                loaded?.value = true;
+                break;
+            }
+          }),
+          onSizeChange: allowInterop((e) {
+            height.value = getProperty(e, 'height') + 50;
+          }),
+        ),
+      );
+
       // ignore: undefined_prefixed_name
       ui.platformViewRegistry.registerViewFactory(
         viewType,
-        (int viewId) {
-          final container = DivElement();
-
-          container.style
-            ..height = 'auto'
-            ..width = '100%'
-            ..overflow = 'hidden';
-
-          ExternalLexicalEditor.create(
-            container,
-            ExternalLexicalEditorOptions(
-              userId: userId,
-              objectId: objectId,
-              onStateChange: allowInterop((e) {
-                changed?.value = getProperty(e, 'changed');
-              }),
-              onSizeChange: allowInterop((e) {
-                height.value = getProperty(e, 'height') + 50;
-              }),
-            ),
-          );
-          return container;
-        },
+        (int viewId) => container,
       );
-      return viewType;
-    }, [userId, objectId]);
+
+      return editor;
+    }, [viewType]);
+
+    useEffect(() => () => editor.dispose(), []);
 
     return SizedBox(
       height: height.value,
@@ -97,25 +106,19 @@ class LexicalEditorRenderer extends HookWidget {
   }
 }
 
-class ExternalLexicalEditorLoader {
-  static Future? _loadLexicalEditor;
-  static bool _loadLexicalEditorDone = false;
-
-  static load() {
-    if (_loadLexicalEditor == null) {
-      _loadLexicalEditor = promiseToFuture(
-        eval(
-          'import("/assets/editor/lib/index.js").then(m => (window.ExternalLexicalEditor = m.default))',
-        ),
-      );
-      _loadLexicalEditor?.then((value) {
-        _loadLexicalEditorDone = true;
-      });
-    }
-    return _loadLexicalEditor;
-  }
-
-  static get isLoaded => _loadLexicalEditorDone;
+AsyncSnapshot<bool> useLoadEditor() {
+  return useFuture<bool>(useMemoized(
+    () => promiseToFuture(
+      eval(
+        '''
+import("/assets/editor/lib/index.js").then((m) => {
+  window.ExternalLexicalEditor = m.default
+})
+        ''',
+      ),
+    ).then((value) => true),
+    [],
+  ));
 }
 
 @JS('eval')
@@ -123,10 +126,12 @@ external dynamic eval(String arg);
 
 @JS()
 class ExternalLexicalEditor {
-  external static create(
+  external static ExternalLexicalEditor create(
     HtmlElement container,
     ExternalLexicalEditorOptions options,
   );
+
+  external void dispose();
 }
 
 @JS()

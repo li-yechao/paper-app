@@ -26,6 +26,7 @@ class ObjectScreen extends HookConsumerWidget {
     final authState = ref.watch(authStateProvider);
     final user = authState.user;
     final changed = useState<bool?>(null);
+    final loaded = useState(false);
 
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
@@ -46,23 +47,46 @@ class ObjectScreen extends HookConsumerWidget {
       ),
       child: SafeArea(
         bottom: false,
-        child: CupertinoScrollbar(
-          controller: scrollController,
-          child: SingleChildScrollView(
-            controller: scrollController,
-            child: Padding(
-              padding: EdgeInsets.only(
-                bottom: max(16.0, MediaQuery.of(context).padding.bottom),
+        child: Stack(
+          children: [
+            if (user != null)
+              CupertinoScrollbar(
+                controller: scrollController,
+                child: CustomScrollView(
+                  controller: scrollController,
+                  physics: const BouncingScrollPhysics(
+                    parent: AlwaysScrollableScrollPhysics(),
+                  ),
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: Editor(
+                        userId: user.id,
+                        objectId: objectId,
+                        changed: changed,
+                        loaded: loaded,
+                      ),
+                    ),
+                    SliverPadding(
+                      padding: EdgeInsets.only(
+                        bottom:
+                            max(16.0, MediaQuery.of(context).padding.bottom),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              child: user != null
-                  ? Editor(
-                      userId: user.id,
-                      objectId: objectId,
-                      changed: changed,
-                    )
-                  : Container(),
+            Positioned(
+              top: 48.0,
+              left: 0,
+              right: 0,
+              child: Visibility(
+                visible: user == null || !loaded.value,
+                child: const Center(
+                  child: CupertinoActivityIndicator(),
+                ),
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
