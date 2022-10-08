@@ -33,7 +33,7 @@ const theme: EditorThemeClasses = {
       text-decoration: line-through underline;
     `,
     code: css`
-      background-color: rgb(240, 242, 245);
+      background-color: rgba(128, 128, 128, 0.2);
       padding: 1px 0.25rem;
       font-family: Menlo, Consolas, Monaco, monospace;
       font-size: 94%;
@@ -202,7 +202,7 @@ const theme: EditorThemeClasses = {
     }
   `,
   code: css`
-    background-color: rgb(240, 242, 245);
+    background-color: rgba(128, 128, 128, 0.15);
     font-family: Menlo, Consolas, Monaco, monospace;
     display: block;
     padding: 8px 8px 8px 52px;
@@ -218,10 +218,10 @@ const theme: EditorThemeClasses = {
     &:before {
       content: attr(data-gutter);
       position: absolute;
-      background-color: #eee;
+      background-color: rgba(128, 128, 128, 0.2);
       left: 0;
       top: 0;
-      border-right: 1px solid #ccc;
+      background-color: rgba(128, 128, 128, 0.25);
       padding: 8px;
       color: #777;
       white-space: pre-wrap;
