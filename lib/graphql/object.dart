@@ -26,6 +26,7 @@ QueryOptions<ObjectConnection> objectConnectionQueryOptions({
                 createdAt
                 updatedAt
                 meta
+                public
               }
             }
 
@@ -69,6 +70,32 @@ QueryHookResult<ObjectConnection> useObjectConnectionQuery({
   return useQuery(options);
 }
 
+MutationOptions<Object> updateObjectOptions({
+  required String objectId,
+  required dynamic input,
+}) {
+  return MutationOptions(
+    document: gql(
+      """
+      mutation UpdateObject(\$objectId: String!, \$input: UpdateObjectInput!) {
+        updateObject(objectId: \$objectId, input: \$input) {
+          id
+          createdAt
+          updatedAt
+          meta
+          public
+        }
+      }
+      """,
+    ),
+    variables: {
+      'objectId': objectId,
+      'input': input,
+    },
+    parserFn: (data) => Object.fromJson(data['updateObject']),
+  );
+}
+
 class ObjectConnection {
   final List<Edge<Object>> edges;
   final PageInfo pageInfo;
@@ -98,12 +125,14 @@ class Object {
   final int createdAt;
   final int updatedAt;
   final Meta? meta;
+  final bool? public;
 
   Object({
     required this.id,
     required this.createdAt,
     required this.updatedAt,
     this.meta,
+    this.public,
   });
 
   factory Object.fromJson(Map<String, dynamic> json) {
@@ -112,6 +141,7 @@ class Object {
       createdAt: int.parse(json['createdAt']),
       updatedAt: int.parse(json['updatedAt']),
       meta: Meta.fromJson(json['meta']),
+      public: json['public'],
     );
   }
 }

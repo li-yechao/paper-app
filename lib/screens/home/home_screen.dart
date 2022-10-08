@@ -7,6 +7,7 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:paper/graphql/object.dart';
+import 'package:paper/graphql/use_graphql_client.dart';
 import 'package:paper/ios_app.dart';
 import 'package:paper/screens/object/object_screen.dart';
 import 'package:paper/state/auth.dart';
@@ -118,6 +119,7 @@ class _ObjectListState extends State<ObjectList> {
   @override
   Widget build(BuildContext context) {
     final format = useMemoized(() => DateFormat.yMd().add_Hms(), []);
+    final client = useGraphQLClient();
 
     final objectConnection = useObjectConnectionQuery(
       userId: widget.userId,
@@ -208,21 +210,31 @@ class _ObjectListState extends State<ObjectList> {
 
             final item = data.edges[index];
 
-            final borderSide = BorderSide(
-              width: 0.5,
-              color: CupertinoColors.opaqueSeparator.resolveFrom(context),
-            );
-
-            return Container(
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: borderSide,
-                  top: index == 0 ? borderSide : BorderSide.none,
+            return CupertinoContextMenu(
+              actions: [
+                CupertinoContextMenuAction(
+                  onPressed: () {
+                    client.mutate(
+                      updateObjectOptions(
+                        objectId: item.node.id,
+                        input: {
+                          'public': item.node.public != true ? true : false
+                        },
+                      ),
+                    );
+                    Navigator.of(context).pop();
+                  },
+                  trailingIcon: item.node.public == true
+                      ? CupertinoIcons.lock
+                      : CupertinoIcons.book,
+                  child: Text(
+                    item.node.public == true ? 'Set Private' : 'Set Public',
+                  ),
                 ),
-              ),
-              child: CupertinoButton(
-                padding: EdgeInsets.zero,
-                onPressed: () {
+              ],
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
                   MyRouterDelegate.of(context).push(
                     RouteConfigure(
                       screen: () => ObjectScreen(
@@ -234,18 +246,39 @@ class _ObjectListState extends State<ObjectList> {
                   );
                 },
                 child: Container(
-                  width: double.infinity,
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        item.node.meta?.title ?? 'Untitled',
+                      RichText(
+                        text: TextSpan(
+                          children: [
+                            WidgetSpan(
+                              child: Icon(
+                                item.node.public == true
+                                    ? CupertinoIcons.book
+                                    : CupertinoIcons.lock,
+                                color: CupertinoColors.secondaryLabel
+                                    .resolveFrom(context),
+                                size: 16.0,
+                              ),
+                              baseline: TextBaseline.alphabetic,
+                              alignment: PlaceholderAlignment.baseline,
+                            ),
+                            TextSpan(
+                              text: item.node.meta?.title ?? 'Untitled',
+                              style: TextStyle(
+                                color: CupertinoColors.label.resolveFrom(
+                                  context,
+                                ),
+                                fontSize: 16.0,
+                              ),
+                            ),
+                          ],
+                        ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: CupertinoColors.label.resolveFrom(context),
-                        ),
                       ),
                       Padding(
                         padding: const EdgeInsets.only(top: 8.0),
