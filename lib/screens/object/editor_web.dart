@@ -108,15 +108,21 @@ class LexicalEditorRenderer extends HookWidget {
 
 AsyncSnapshot<bool> useLoadEditor() {
   return useFuture<bool>(useMemoized(
-    () => promiseToFuture(
-      eval(
-        '''
-import("/assets/editor/lib/index.js").then((m) => {
+    () {
+      final uri = (Uri.base.pathSegments.toList()
+            ..insert(0, '')
+            ..add('assets/editor/lib/index.js'))
+          .join('/');
+      return promiseToFuture(
+        eval(
+          '''
+import("$uri").then((m) => {
   window.ExternalLexicalEditor = m.default
 })
-        ''',
-      ),
-    ).then((value) => true),
+          ''',
+        ),
+      ).then((value) => true);
+    },
     [],
   ));
 }
