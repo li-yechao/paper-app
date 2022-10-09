@@ -214,6 +214,7 @@ const theme: EditorThemeClasses = {
     tab-size: 2;
     overflow-x: auto;
     position: relative;
+    white-space: pre;
 
     &:before {
       content: attr(data-gutter);
