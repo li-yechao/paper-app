@@ -1,0 +1,45 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build-web:
+    name: Build Flutter (Web)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - run: flutter pub get
+
+      - run: |
+          flutter build \
+            web \
+            --dart-define=AUTH_GRAPHQL_URI=https://passport.yechao.xyz/graphql \
+            --dart-define=GRAPHQL_URI=https://paper.yechao.xyz/graphql \
+            --dart-define=GITHUB_CLIENT_ID=03f03765f01e157fc66f \
+            --dart-define=GITHUB_REDIRECT_URI=https://passport.yechao.xyz/auth/paper/app \
+            --base-href '/app/'
+          tar -cvzf web.tar.gz -C build/web .
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body: 'Full Changelog: https://github.com/${{github.repository}}/blob/main/CHANGELOG.md'
+          files: |
+            web.tar.gz
+
+      - name: Deploy
+        run: |
+          TAG=$(echo "${GITHUB_REF#refs/*/}" | sed -e "s~+~%2B~")
+          deploy_url=$(echo "${{ secrets.WEB_DEPLOY_HOOK_URL }}" | sed -e "s~{{tag}}~${TAG}~")
+          [[ "$deploy_url" == https://* ]] && curl "$deploy_url" || :
