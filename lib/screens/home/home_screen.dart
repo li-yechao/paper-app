@@ -277,6 +277,11 @@ class ObjectItem extends HookWidget {
   final bool? public;
   final int updatedAt;
 
+  String get _title {
+    final t = title?.trim();
+    return t?.isNotEmpty == true ? t! : 'Untitled';
+  }
+
   @override
   Widget build(BuildContext context) {
     final client = useGraphQLClient();
@@ -305,7 +310,7 @@ class ObjectItem extends HookWidget {
           RouteConfigure(
             screen: () => ObjectScreen(
               objectId: objectId,
-              title: title,
+              title: _title,
               previousPageTitle: 'Home',
             ),
           ),
@@ -333,7 +338,7 @@ class ObjectItem extends HookWidget {
                     alignment: PlaceholderAlignment.baseline,
                   ),
                   TextSpan(
-                    text: title ?? 'Untitled',
+                    text: _title,
                     style: TextStyle(
                       color: CupertinoColors.label.resolveFrom(context),
                       fontSize: 16.0,
