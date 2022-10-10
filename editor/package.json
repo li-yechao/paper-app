@@ -5,8 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
-    "build:lib": "tsc && vite build -c vite.config.lib.ts",
+    "build": "tsc && vite build --base ./",
     "preview": "vite preview"
   },
   "dependencies": {

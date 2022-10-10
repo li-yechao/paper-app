@@ -29,7 +29,6 @@ export interface ObjectEditorProps {
   userId: string
   objectId: string
   onStateChange?: (e: StateChangeEvent) => void
-  onSizeChange?: (e: { width: number; height: number }) => void
 }
 
 export type StateChangeEvent =
@@ -37,12 +36,7 @@ export type StateChangeEvent =
   | { type: 'saved'; updatedAt: string; title: string }
   | { type: 'loaded' }
 
-export default function ObjectEditor({
-  userId,
-  objectId,
-  onStateChange,
-  onSizeChange,
-}: ObjectEditorProps) {
+export default function ObjectEditor({ userId, objectId, onStateChange }: ObjectEditorProps) {
   useEffect(() => {
     window.scrollTo({ top: 0 })
   }, [objectId])
@@ -58,13 +52,7 @@ export default function ObjectEditor({
   if (object.error) {
     throw object.error
   } else if (object.data) {
-    return (
-      <_ObjectEditor
-        object={object.data.user.object}
-        onStateChange={onStateChange}
-        onSizeChange={onSizeChange}
-      />
-    )
+    return <_ObjectEditor object={object.data.user.object} onStateChange={onStateChange} />
   } else if (object.loading) {
     return null
   }
@@ -74,8 +62,7 @@ export default function ObjectEditor({
 const _ObjectEditor = ({
   object,
   onStateChange,
-  onSizeChange,
-}: Pick<ObjectEditorProps, 'onStateChange' | 'onSizeChange'> & {
+}: Pick<ObjectEditorProps, 'onStateChange'> & {
   object: {
     id: string
     userId: string
@@ -213,22 +200,8 @@ const _ObjectEditor = ({
     [createObject, queryObjectUri]
   )
 
-  const container = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const observer = new ResizeObserver(entries => {
-      const e = entries[0]
-      if (e) {
-        const { inlineSize: width, blockSize: height } = e.borderBoxSize[0]!
-        onSizeChange?.({ width, height })
-      }
-    })
-    container.current && observer.observe(container.current)
-    return () => observer.disconnect()
-  }, [])
-
   return (
-    <_Container ref={container}>
+    <_Container>
       <ImageNode.Provider value={imageProviderValue}>
         <_Editor
           key={object.id}

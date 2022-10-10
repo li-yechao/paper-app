@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -21,8 +19,6 @@ class ObjectScreen extends HookConsumerWidget {
 
   @override
   Widget build(context, ref) {
-    final scrollController = useMemoized(() => ScrollController(), []);
-
     final authState = ref.watch(authStateProvider);
     final user = authState.user;
     final changed = useState<bool?>(null);
@@ -50,29 +46,12 @@ class ObjectScreen extends HookConsumerWidget {
         child: Stack(
           children: [
             if (user != null)
-              CupertinoScrollbar(
-                controller: scrollController,
-                child: CustomScrollView(
-                  controller: scrollController,
-                  physics: const BouncingScrollPhysics(
-                    parent: AlwaysScrollableScrollPhysics(),
-                  ),
-                  slivers: [
-                    SliverToBoxAdapter(
-                      child: Editor(
-                        userId: user.id,
-                        objectId: objectId,
-                        changed: changed,
-                        loaded: loaded,
-                      ),
-                    ),
-                    SliverPadding(
-                      padding: EdgeInsets.only(
-                        bottom:
-                            max(16.0, MediaQuery.of(context).padding.bottom),
-                      ),
-                    ),
-                  ],
+              Positioned.fill(
+                child: Editor(
+                  userId: user.id,
+                  objectId: objectId,
+                  changed: changed,
+                  loaded: loaded,
                 ),
               ),
             Positioned(
