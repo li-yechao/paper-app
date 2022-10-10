@@ -351,6 +351,7 @@ const Placeholder = styled.div`
   position: absolute;
   text-overflow: ellipsis;
   left: 0;
+  top: 0;
   user-select: none;
   white-space: nowrap;
   display: inline-block;
