@@ -800,11 +800,6 @@ $$`})]})}const iB=Qe.span`
     `},paragraph:ce`
     margin: 0 0 8px;
     text-align: justify;
-    white-space: normal;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
   `,quote:ce`
     margin: 5px 0;
     padding-left: 1em;
@@ -1062,6 +1057,7 @@ $$`})]})}const iB=Qe.span`
   position: absolute;
   text-overflow: ellipsis;
   left: 0;
+  top: 0;
   user-select: none;
   white-space: nowrap;
   display: inline-block;

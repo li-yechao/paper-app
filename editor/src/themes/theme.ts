@@ -42,11 +42,6 @@ const theme: EditorThemeClasses = {
   paragraph: css`
     margin: 0 0 8px;
     text-align: justify;
-    white-space: normal;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
   `,
   quote: css`
     margin: 5px 0;
