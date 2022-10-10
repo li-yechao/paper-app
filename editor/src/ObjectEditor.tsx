@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import styled from '@emotion/styled'
 import equal from 'fast-deep-equal/es6'
 import { $getRoot, EditorState } from 'lexical'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -114,10 +113,8 @@ const _ObjectEditor = ({
       })
         .then(() => {
           setSavedState(state)
-          // message.success('Save Success')
         })
         .catch(error => {
-          // message.error(error.message)
           throw error
         })
     },
@@ -201,38 +198,13 @@ const _ObjectEditor = ({
   )
 
   return (
-    <_Container>
-      <ImageNode.Provider value={imageProviderValue}>
-        <_Editor
-          key={object.id}
-          defaultValue={object.data}
-          readOnly={user?.id !== object.userId}
-          onChange={onChange}
-        />
-      </ImageNode.Provider>
-    </_Container>
+    <ImageNode.Provider value={imageProviderValue}>
+      <LexicalEditor
+        key={object.id}
+        defaultValue={object.data}
+        readOnly={user?.id !== object.userId}
+        onChange={onChange}
+      />
+    </ImageNode.Provider>
   )
 }
-
-const _Container = styled.div`
-  --background-color: #ffffff;
-  --app-bar-color: #f2f2f7;
-  --color: #000000;
-
-  @media (prefers-color-scheme: dark) {
-    --background-color: #000000;
-    --app-bar-color: #1c1c1e;
-    --color: #ffffff;
-  }
-
-  background-color: var(--background-color);
-  color: var(--color);
-  font-family: -apple-system, system-ui, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif,
-    BlinkMacSystemFont, Helvetica Neue, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Arial;
-  font-size: 15px;
-  line-height: 1.6;
-`
-
-const _Editor = styled(LexicalEditor)`
-  margin: 16px;
-`

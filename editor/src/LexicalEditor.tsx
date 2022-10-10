@@ -256,17 +256,17 @@ export default function LexicalEditor(props: LexicalEditorProps) {
 
   return (
     <LexicalComposer initialConfig={initialConfig}>
-      <_ImageInput
-        type="file"
-        accept="image/*"
-        multiple
-        onChange={handleImageInputChange}
-        ref={imageInput}
-      />
-
       <EditorContainer className={props.className}>
+        <_ImageInput
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={handleImageInputChange}
+          ref={imageInput}
+        />
+
         <RichTextPlugin
-          contentEditable={<_ContentEditable testid="lexical-editor" />}
+          contentEditable={<ContentEditable className="lexical-editor" testid="lexical-editor" />}
           placeholder={<Placeholder>Input something...</Placeholder>}
         />
         {props.onChange && <OnChangePlugin onChange={props.onChange} />}
@@ -331,17 +331,35 @@ const EditablePlugin = ({ editable }: { editable: boolean }) => {
 }
 
 const EditorContainer = styled.div`
+  --background-color: #ffffff;
+  --app-bar-color: #f2f2f7;
+  --color: #000000;
+
+  @media (prefers-color-scheme: dark) {
+    --background-color: #000000;
+    --app-bar-color: #1c1c1e;
+    --color: #ffffff;
+  }
+
   position: relative;
+  background-color: var(--background-color);
+  color: var(--color);
+  font-family: -apple-system, system-ui, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif,
+    BlinkMacSystemFont, Helvetica Neue, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Arial;
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 16px;
+
+  > .lexical-editor {
+    outline: none;
+    min-height: calc(100vh - 32px);
+  }
 `
 
 const _ImageInput = styled.input`
   position: fixed;
   left: -1000px;
   top: 0;
-`
-
-const _ContentEditable = styled(ContentEditable)`
-  outline: none;
 `
 
 const Placeholder = styled.div`
