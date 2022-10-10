@@ -6,6 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:paper/graphql/common_model.dart';
 import 'package:paper/graphql/object.dart';
 import 'package:paper/graphql/use_graphql_client.dart';
 import 'package:paper/ios_app.dart';
@@ -15,6 +16,7 @@ import 'package:paper/widgets/content_menu.dart';
 import 'package:paper/widgets/query_result_renderer.dart';
 import 'package:rxdart/rxdart.dart';
 
+import 'create_button.dart';
 import 'user_button.dart';
 
 class HomeScreen extends HookConsumerWidget {
@@ -42,8 +44,12 @@ class HomeScreen extends HookConsumerWidget {
               largeTitle: const Text('Paper'),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
-                children: const [
-                  UserButton(),
+                children: [
+                  if (userId != null)
+                    CreateButton(
+                      onCreated: () => objectList.currentState?.fetchRecent(),
+                    ),
+                  const UserButton(),
                 ],
               ),
             ),
@@ -115,7 +121,36 @@ class _ObjectListState extends State<ObjectList> {
     await result?.refetch();
   }
 
+  fetchRecent() async {
+    final before = firstEdge?.cursor;
+    if (before != null) {
+      await result?.fetchMore(
+        objectConnectionFetchMoreOptions(before: before),
+      );
+    }
+  }
+
   QueryHookResult<ObjectConnection>? result;
+
+  List<Edge<Object>>? get edges {
+    return result?.result.parsedData?.edges;
+  }
+
+  bool? get hasNextPage {
+    return result?.result.parsedData?.pageInfo.hasNextPage;
+  }
+
+  bool? get isLoading {
+    return result?.result.isLoading;
+  }
+
+  Edge<Object>? get firstEdge {
+    return edges?.isNotEmpty == true ? edges!.first : null;
+  }
+
+  Edge<Object>? get lastEdge {
+    return edges?.isNotEmpty == true ? edges!.last : null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -124,10 +159,6 @@ class _ObjectListState extends State<ObjectList> {
       first: 20,
     );
     result = objectConnection;
-
-    final connRef =
-        useRef<QueryResult<ObjectConnection>>(objectConnection.result);
-    connRef.value = objectConnection.result;
 
     useEffect(() {
       final ctl = StreamController<void>();
@@ -138,15 +169,17 @@ class _ObjectListState extends State<ObjectList> {
         trailing: true,
       );
       stream.forEach((element) {
-        if (widget.controller.position.extentAfter > 100 ||
-            connRef.value.parsedData?.pageInfo.hasNextPage == false ||
-            connRef.value.isLoading) {
+        final after = lastEdge?.cursor;
+
+        if (after == null ||
+            hasNextPage == false ||
+            isLoading == true ||
+            widget.controller.position.extentAfter > 100) {
           return;
         }
+
         objectConnection.fetchMore(
-          objectConnectionFetchMoreOptions(
-            after: connRef.value.parsedData?.edges.last.cursor,
-          ),
+          objectConnectionFetchMoreOptions(after: after),
         );
       });
 

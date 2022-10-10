@@ -49,19 +49,26 @@ QueryOptions<ObjectConnection> objectConnectionQueryOptions({
   );
 }
 
-objectConnectionFetchMoreOptions({String? after}) {
+objectConnectionFetchMoreOptions({String? before, String? after}) {
+  assert((before != null && after == null) || (before == null && after != null),
+      'Only allow pass one of `before` or `after`');
+
   return FetchMoreOptions(
     updateQuery: (previousResultData, fetchMoreResultData) {
       final List oldList = previousResultData!['user']['objects']['edges'];
       final List newList = fetchMoreResultData!['user']['objects']['edges'];
-      oldList.addAll(newList);
 
-      previousResultData['user']['objects']['pageInfo'] =
-          fetchMoreResultData['user']['objects']['pageInfo'];
+      if (after != null) {
+        oldList.addAll(newList);
+        previousResultData['user']['objects']['pageInfo'] =
+            fetchMoreResultData['user']['objects']['pageInfo'];
+      } else {
+        oldList.insertAll(0, newList);
+      }
 
       return previousResultData;
     },
-    variables: {'after': after},
+    variables: {'before': before, 'after': after},
   );
 }
 
@@ -84,6 +91,32 @@ QueryHookResult<ObjectConnection> useObjectConnectionQuery({
   );
 
   return useQuery(options);
+}
+
+MutationOptions<Object> createObjectOptions({
+  required dynamic input,
+  String? parentId,
+}) {
+  return MutationOptions(
+    document: gql(
+      """
+      mutation CreateObject(\$input: CreateObjectInput!, \$parentId: String) {
+        createObject(input: \$input, parentId: \$parentId) {
+          id
+          createdAt
+          updatedAt
+          meta
+          public
+        }
+      }
+      """,
+    ),
+    variables: {
+      'input': input,
+      'parentId': parentId,
+    },
+    parserFn: (data) => Object.fromJson(data['createObject']),
+  );
 }
 
 MutationOptions<Object> updateObjectOptions({
@@ -152,11 +185,13 @@ class Object {
   });
 
   factory Object.fromJson(Map<String, dynamic> json) {
+    final meta = json['meta'];
+
     return Object(
       id: json['id'],
       createdAt: int.parse(json['createdAt']),
       updatedAt: int.parse(json['updatedAt']),
-      meta: Meta.fromJson(json['meta']),
+      meta: meta == null ? null : Meta.fromJson(meta),
       public: json['public'],
     );
   }
