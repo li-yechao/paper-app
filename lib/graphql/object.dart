@@ -49,6 +49,22 @@ QueryOptions<ObjectConnection> objectConnectionQueryOptions({
   );
 }
 
+objectConnectionFetchMoreOptions({String? after}) {
+  return FetchMoreOptions(
+    updateQuery: (previousResultData, fetchMoreResultData) {
+      final List oldList = previousResultData!['user']['objects']['edges'];
+      final List newList = fetchMoreResultData!['user']['objects']['edges'];
+      oldList.addAll(newList);
+
+      previousResultData['user']['objects']['pageInfo'] =
+          fetchMoreResultData['user']['objects']['pageInfo'];
+
+      return previousResultData;
+    },
+    variables: {'after': after},
+  );
+}
+
 QueryHookResult<ObjectConnection> useObjectConnectionQuery({
   required String userId,
   String? before,
