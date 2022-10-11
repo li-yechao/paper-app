@@ -28,7 +28,7 @@ jobs:
             --dart-define=GRAPHQL_URI=https://paper.yechao.xyz/graphql \
             --dart-define=GITHUB_CLIENT_ID=03f03765f01e157fc66f \
             --dart-define=GITHUB_REDIRECT_URI=https://passport.yechao.xyz/auth/paper/app \
-            --base-href '/app/'
+            --web-renderer html
           tar -cvzf web.tar.gz -C build/web .
 
       - name: Release
