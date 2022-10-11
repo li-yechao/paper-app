@@ -1,3 +1,11 @@
+## v1.0.0+3 (2022-10-11)
+
+
+### Features
+
+* use new app domain ([a25a88d](https://github.com/li-yechao/paper-app/commit/a25a88dad1fd537402ca313d45e82440f222c16c))
+
+
 ## v1.0.0+2 (2022-10-11)
 
 
