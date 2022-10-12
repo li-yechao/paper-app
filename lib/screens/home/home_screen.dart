@@ -12,7 +12,7 @@ import 'package:paper/graphql/use_graphql_client.dart';
 import 'package:paper/ios_app.dart';
 import 'package:paper/screens/object/object_screen.dart';
 import 'package:paper/state/auth.dart';
-import 'package:paper/widgets/content_menu.dart';
+import 'package:paper/widgets/context_menu.dart';
 import 'package:paper/widgets/query_result_renderer.dart';
 import 'package:rxdart/rxdart.dart';
 
