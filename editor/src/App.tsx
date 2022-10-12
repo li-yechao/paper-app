@@ -1,4 +1,5 @@
 import { ApolloProvider } from '@apollo/client'
+import { css, Global } from '@emotion/react'
 import { useCallback, useMemo } from 'react'
 import { IntlProvider } from 'react-intl'
 import { useSearchParam } from 'react-use'
@@ -26,6 +27,14 @@ export default function App() {
   return (
     <ApolloProvider client={apolloClient}>
       <IntlProvider locale={navigator.language}>
+        <Global
+          styles={css`
+            html {
+              overscroll-behavior: contain;
+            }
+          `}
+        />
+
         <ObjectEditor userId={userId} objectId={objectId} onStateChange={onStateChagne} />
       </IntlProvider>
     </ApolloProvider>
