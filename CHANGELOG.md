@@ -1,3 +1,13 @@
+## v1.0.0+4 (2022-10-12)
+
+
+### Bug Fixes
+
+* correct view insets when keyboard visibility changed ([5aa8539](https://github.com/li-yechao/paper-app/commit/5aa8539465875e6fb3e1c384cd8b31de7a9ef98e))
+* prevent page scrolling ([bcd373b](https://github.com/li-yechao/paper-app/commit/bcd373b7b4d2d862740c85616d5e02f89c1986ee))
+* scroll into view if needed ([1b7866d](https://github.com/li-yechao/paper-app/commit/1b7866da06a22725f7c57c44869c79553f6b0e6a))
+
+
 ## v1.0.0+3 (2022-10-11)
 
 
