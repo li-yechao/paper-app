@@ -279,6 +279,7 @@ export default function LexicalEditor(props: LexicalEditorProps) {
         <HistoryPlugin />
 
         <NoAutoFocusPlugin />
+        <AutoScrollIntoViewPlugin />
         <EditablePlugin editable={!props.readOnly} />
         <TrailingParagraphPlugin />
         <BlockMenuPlugin commands={blockMenuCommands} />
@@ -326,6 +327,28 @@ const EditablePlugin = ({ editable }: { editable: boolean }) => {
   useEffect(() => {
     editor.setEditable(editable)
   }, [editor, editable])
+
+  return null
+}
+
+const AutoScrollIntoViewPlugin = () => {
+  const [editor] = useLexicalComposerContext()
+
+  useEffect(() => {
+    const dom = editor.getRootElement()
+    const onFocus = () => {
+      setTimeout(() => {
+        const selection = window.getSelection()
+        if (selection && selection.rangeCount > 0) {
+          const bottom = selection.getRangeAt(0).getBoundingClientRect().bottom
+          const windowHeight = window.visualViewport?.height || window.innerHeight
+          document.documentElement.scrollTop += bottom - windowHeight + windowHeight / 4
+        }
+      }, 500)
+    }
+    dom?.addEventListener('focus', onFocus)
+    return () => dom?.removeEventListener('focus', onFocus)
+  }, [editor])
 
   return null
 }
