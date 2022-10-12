@@ -340,9 +340,11 @@ const AutoScrollIntoViewPlugin = () => {
       setTimeout(() => {
         const selection = window.getSelection()
         if (selection && selection.rangeCount > 0) {
-          const bottom = selection.getRangeAt(0).getBoundingClientRect().bottom
+          const { bottom } = selection.getRangeAt(0).getBoundingClientRect()
           const windowHeight = window.visualViewport?.height || window.innerHeight
-          document.documentElement.scrollTop += bottom - windowHeight + windowHeight / 4
+          if (bottom <= 0 || bottom >= windowHeight) {
+            document.documentElement.scrollTop += bottom - windowHeight + windowHeight / 4
+          }
         }
       }, 500)
     }
