@@ -1,3 +1,18 @@
+## v1.0.0+5 (2022-10-13)
+
+
+### Features
+
+* load list order by update time descending ([086c382](https://github.com/li-yechao/paper-app/commit/086c38273f6ad7cd25bb1cd1bf465dfe38cec1e4))
+
+
+### Bug Fixes
+
+* custom `CodeNode` to fix export code and line number issue ([fd3ede7](https://github.com/li-yechao/paper-app/commit/fd3ede76daebd82753c8d3f06f58eb0031edc020))
+* only scroll into view if needed ([9c67edf](https://github.com/li-yechao/paper-app/commit/9c67edf17c2b5d23e07ea61feb3944ca7eba500b))
+* should check graphql ressult hasException ([a974eed](https://github.com/li-yechao/paper-app/commit/a974eed278fadebe8e5706d8ae187c7ced149433))
+
+
 ## v1.0.0+4 (2022-10-12)
 
 
