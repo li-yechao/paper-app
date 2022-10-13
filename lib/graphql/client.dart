@@ -40,6 +40,10 @@ extension GraphQLInstance on GraphQLClient {
                 },
               ),
             );
+            if (result.hasException) {
+              throw result.exception!;
+            }
+
             final json = result.data?['auth'];
             final newToken = Token.fromJson(json);
             await SharedStorage.setToken(newToken);

@@ -21,7 +21,7 @@ class AuthLink extends Link {
     required this.requestTransformer,
   });
 
-  Future<Stream<Response>?> _onGraphQLError(
+  Future<Stream<Response>> _onGraphQLError(
     Request request,
     NextLink forward,
     Response response,
@@ -30,7 +30,11 @@ class AuthLink extends Link {
       if (await needRefreshToken(response)) {
         if (_pendings == null) {
           _pendings = [];
-          await refreshTokenHandler();
+          try {
+            await refreshTokenHandler();
+          } catch (e) {
+            return Stream.value(response);
+          }
         } else {
           final completer = Completer();
           _pendings!.add(completer);
@@ -39,8 +43,9 @@ class AuthLink extends Link {
 
         final req = await requestTransformer(request);
         return forward(req);
+      } else {
+        return Stream.value(response);
       }
-      return null;
     } finally {
       _pendings?.forEach((element) {
         element.complete();
@@ -68,16 +73,10 @@ class AuthLink extends Link {
         final errors = response.errors;
 
         if (errors != null && errors.isNotEmpty) {
-          final stream = await _onGraphQLError(request, forward, response);
-
-          if (stream != null) {
-            yield* stream;
-
-            return;
-          }
+          yield* await _onGraphQLError(request, forward, response);
+        } else {
+          yield response;
         }
-
-        yield response;
       }
     }
   }

@@ -7,6 +7,7 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:paper/graphql/common_model.dart';
+import 'package:paper/graphql/exception.dart';
 import 'package:paper/graphql/object.dart';
 import 'package:paper/graphql/use_graphql_client.dart';
 import 'package:paper/ios_app.dart';
@@ -80,7 +81,8 @@ class HomeScreen extends HookConsumerWidget {
                   ),
                   child: Center(
                     child: Text(
-                      'Please sign in first',
+                      authState.error?.graphqlErrorMessage ??
+                          'Please sign in first',
                       style: TextStyle(
                         color: CupertinoColors.secondaryLabel.resolveFrom(
                           context,

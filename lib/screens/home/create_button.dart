@@ -21,6 +21,10 @@ class CreateButton extends HookWidget {
       padding: EdgeInsets.zero,
       onPressed: () {
         client.mutate(createObjectOptions(input: {})).then((value) {
+          if (value.hasException) {
+            throw value.exception!;
+          }
+
           final objectId = value.parsedData?.id;
           if (objectId != null) {
             onCreated?.call();

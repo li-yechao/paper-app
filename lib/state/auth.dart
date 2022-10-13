@@ -15,14 +15,22 @@ class AuthStateNotifier extends ChangeNotifier {
 
   User? user;
 
+  Exception? error;
+
   Future<void> refresh(GraphQLClient client) async {
     try {
       loading = true;
       notifyListeners();
 
       final res = await client.query<User>(viewerQueryOptions());
+      if (res.hasException) {
+        throw res.exception!;
+      }
 
       user = res.parsedData;
+      error = null;
+    } catch (e) {
+      error = e as Exception;
     } finally {
       loading = false;
       notifyListeners();
@@ -40,6 +48,9 @@ class AuthStateNotifier extends ChangeNotifier {
       final res = await client.mutate<Token>(
         authMutationOptions(variables: variables),
       );
+      if (res.hasException) {
+        throw res.exception!;
+      }
 
       final token = res.parsedData;
       if (token != null) {
