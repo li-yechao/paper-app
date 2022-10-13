@@ -3,21 +3,45 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 
 import 'common_model.dart';
 
+class ObjectOrder {
+  ObjectOrder({
+    required this.field,
+    required this.direction,
+  });
+
+  final String field;
+  final String direction;
+}
+
 QueryOptions<ObjectConnection> objectConnectionQueryOptions({
   required String userId,
   String? before,
   String? after,
   int? first,
   int? last,
+  ObjectOrder? orderBy,
 }) {
   return QueryOptions(
     document: gql(
       """
-      query Objects(\$userId: String!, \$before: String, \$after: String, \$first: Int, \$last: Int) {
+      query Objects(
+        \$userId: String!
+        \$before: String
+        \$after: String
+        \$first: Int
+        \$last: Int
+        \$orderBy: ObjectOrder
+      ) {
         user(userId: \$userId) {
           id
 
-          objects(before: \$before, after: \$after, first: \$first, last: \$last) {
+          objects(
+            before: \$before
+            after: \$after
+            first: \$first
+            last: \$last
+            orderBy: \$orderBy
+          ) {
             edges {
               cursor
 
@@ -44,6 +68,9 @@ QueryOptions<ObjectConnection> objectConnectionQueryOptions({
       'after': after,
       'first': first,
       'last': last,
+      'orderBy': orderBy != null
+          ? {'field': orderBy.field, 'direction': orderBy.direction}
+          : null
     },
     parserFn: (data) => ObjectConnection.fromJson(data['user']['objects']),
   );
@@ -57,6 +84,10 @@ objectConnectionFetchMoreOptions({String? before, String? after}) {
     updateQuery: (previousResultData, fetchMoreResultData) {
       final List oldList = previousResultData!['user']['objects']['edges'];
       final List newList = fetchMoreResultData!['user']['objects']['edges'];
+
+      final newIds = Set.from(newList.map((e) => e['node']['id']));
+
+      oldList.removeWhere((e) => newIds.contains(e['node']['id']));
 
       if (after != null) {
         oldList.addAll(newList);
@@ -78,6 +109,7 @@ QueryHookResult<ObjectConnection> useObjectConnectionQuery({
   String? after,
   int? first,
   int? last,
+  ObjectOrder? orderBy,
 }) {
   final options = useMemoized(
     () => objectConnectionQueryOptions(
@@ -86,8 +118,9 @@ QueryHookResult<ObjectConnection> useObjectConnectionQuery({
       after: after,
       first: first,
       last: last,
+      orderBy: orderBy,
     ),
-    [userId, before, after, first, last],
+    [userId, before, after, first, last, orderBy?.field, orderBy?.direction],
   );
 
   return useQuery(options);
@@ -194,6 +227,11 @@ class Object {
       meta: meta == null ? null : Meta.fromJson(meta),
       public: json['public'],
     );
+  }
+
+  String get title {
+    final t = meta?.title?.trim();
+    return t?.isNotEmpty == true ? t! : 'Untitled';
   }
 }
 

@@ -42,7 +42,17 @@ class HomeScreen extends HookConsumerWidget {
           slivers: [
             CupertinoSliverNavigationBar(
               transitionBetweenRoutes: true,
-              largeTitle: const Text('Paper'),
+              largeTitle: GestureDetector(
+                onTap: () {
+                  objectList.currentState?.fetchRecent();
+                  controller.animateTo(
+                    0,
+                    curve: Curves.ease,
+                    duration: const Duration(seconds: 1),
+                  );
+                },
+                child: const Text('Paper'),
+              ),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -156,9 +166,12 @@ class _ObjectListState extends State<ObjectList> {
 
   @override
   Widget build(BuildContext context) {
+    final client = useGraphQLClient();
+
     final objectConnection = useObjectConnectionQuery(
       userId: widget.userId,
       first: 20,
+      orderBy: ObjectOrder(field: 'UPDATED_AT', direction: 'DESC'),
     );
     result = objectConnection;
 
@@ -208,13 +221,47 @@ class _ObjectListState extends State<ObjectList> {
               );
             }
 
-            final item = data.edges[index];
+            final node = data.edges[index].node;
 
-            return ObjectItem(
-              objectId: item.node.id,
-              title: item.node.meta?.title,
-              public: item.node.public,
-              updatedAt: item.node.updatedAt,
+            return MyCupertinoContextMenu(
+              actions: [
+                CupertinoContextMenuAction(
+                  onPressed: () {
+                    client.mutate(
+                      updateObjectOptions(
+                        objectId: node.id,
+                        input: {'public': node.public != true ? true : false},
+                      ),
+                    );
+                    Navigator.of(context).pop();
+                  },
+                  trailingIcon: node.public == true
+                      ? CupertinoIcons.lock
+                      : CupertinoIcons.book,
+                  child: Text(
+                    node.public == true ? 'Set Private' : 'Set Public',
+                  ),
+                ),
+              ],
+              onTap: () {
+                MyRouterDelegate.of(context)
+                    .push(
+                      RouteConfigure(
+                        screen: () => ObjectScreen(
+                          objectId: node.id,
+                          title: node.title,
+                          previousPageTitle: 'Home',
+                        ),
+                      ),
+                    )
+                    .whenComplete(() => fetchRecent());
+              },
+              child: ObjectItem(
+                objectId: node.id,
+                title: node.title,
+                public: node.public,
+                updatedAt: node.updatedAt,
+              ),
             );
           },
         ),
@@ -279,94 +326,53 @@ class ObjectItem extends HookWidget {
   final bool? public;
   final int updatedAt;
 
-  String get _title {
-    final t = title?.trim();
-    return t?.isNotEmpty == true ? t! : 'Untitled';
-  }
-
   @override
   Widget build(BuildContext context) {
-    final client = useGraphQLClient();
-
-    return MyCupertinoContextMenu(
-      actions: [
-        CupertinoContextMenuAction(
-          onPressed: () {
-            client.mutate(
-              updateObjectOptions(
-                objectId: objectId,
-                input: {'public': public != true ? true : false},
-              ),
-            );
-            Navigator.of(context).pop();
-          },
-          trailingIcon:
-              public == true ? CupertinoIcons.lock : CupertinoIcons.book,
-          child: Text(
-            public == true ? 'Set Private' : 'Set Public',
-          ),
-        ),
-      ],
-      onTap: () {
-        MyRouterDelegate.of(context).push(
-          RouteConfigure(
-            screen: () => ObjectScreen(
-              objectId: objectId,
-              title: _title,
-              previousPageTitle: 'Home',
-            ),
-          ),
-        );
-      },
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            RichText(
-              text: TextSpan(
-                children: [
-                  WidgetSpan(
-                    child: Icon(
-                      public == true
-                          ? CupertinoIcons.book
-                          : CupertinoIcons.lock,
-                      color:
-                          CupertinoColors.secondaryLabel.resolveFrom(context),
-                      size: 16.0,
-                    ),
-                    baseline: TextBaseline.alphabetic,
-                    alignment: PlaceholderAlignment.baseline,
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          RichText(
+            text: TextSpan(
+              children: [
+                WidgetSpan(
+                  child: Icon(
+                    public == true ? CupertinoIcons.book : CupertinoIcons.lock,
+                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                    size: 16.0,
                   ),
-                  TextSpan(
-                    text: _title,
-                    style: TextStyle(
-                      color: CupertinoColors.label.resolveFrom(context),
-                      fontSize: 16.0,
-                    ),
-                  ),
-                ],
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: Text(
-                _timeFormat.format(
-                  DateTime.fromMillisecondsSinceEpoch(
-                    updatedAt,
+                  baseline: TextBaseline.alphabetic,
+                  alignment: PlaceholderAlignment.baseline,
+                ),
+                TextSpan(
+                  text: title,
+                  style: TextStyle(
+                    color: CupertinoColors.label.resolveFrom(context),
+                    fontSize: 16.0,
                   ),
                 ),
-                style: TextStyle(
-                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                  fontSize: 10.0,
+              ],
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Text(
+              _timeFormat.format(
+                DateTime.fromMillisecondsSinceEpoch(
+                  updatedAt,
                 ),
               ),
+              style: TextStyle(
+                color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                fontSize: 10.0,
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
