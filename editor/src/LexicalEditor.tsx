@@ -1,8 +1,8 @@
 import styled from '@emotion/styled'
-import { $createCodeNode, CodeHighlightNode, CodeNode } from '@lexical/code'
+import { CodeHighlightNode } from '@lexical/code'
 import { AutoLinkNode, LinkNode } from '@lexical/link'
 import { $createListItemNode, $createListNode, ListItemNode, ListNode } from '@lexical/list'
-import { CHECK_LIST, TRANSFORMERS } from '@lexical/markdown'
+import { CHECK_LIST, CODE as CODE_, TRANSFORMERS } from '@lexical/markdown'
 import { AutoLinkPlugin } from '@lexical/react/LexicalAutoLinkPlugin'
 import { CheckListPlugin } from '@lexical/react/LexicalCheckListPlugin'
 import { LexicalComposer } from '@lexical/react/LexicalComposer'
@@ -35,6 +35,7 @@ import Math from './icons/Math'
 import OrderedList from './icons/OrderedList'
 import Table from './icons/Table'
 import TodoList from './icons/TodoList'
+import CodeNode, { $createCodeNode, CODE } from './nodes/CodeNode'
 import { $createEquationNode, $isEquationNode, EquationNode } from './nodes/EquationNode'
 import { $createImageNode, ImageNode } from './nodes/ImageNode'
 import BlockMenuPlugin, { BlockMenuCommand, replaceWithNode } from './plugins/BlockMenuPlugin'
@@ -230,7 +231,8 @@ export default function LexicalEditor(props: LexicalEditorProps) {
 
     return [
       CHECK_LIST,
-      ...TRANSFORMERS,
+      ...TRANSFORMERS.filter(i => i !== CODE_),
+      CODE,
       {
         dependencies: [EquationNode],
         export: exportEquation,
