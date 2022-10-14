@@ -1,3 +1,18 @@
+## v1.0.0+6 (2022-10-14)
+
+
+### Features
+
+* auto save paper before leave editor page ([006b495](https://github.com/li-yechao/paper-app/commit/006b4952a7c632d755f3fa18007beceecf33114b))
+
+
+### Bug Fixes
+
+* avoid page scroll up when editor get focused ([8bedb90](https://github.com/li-yechao/paper-app/commit/8bedb90737021f3f94b066e1bee378e55f5d42e1))
+* check todo item does not trigger onChange ([2700d1b](https://github.com/li-yechao/paper-app/commit/2700d1b4fd70d615b92b0a8276fc5da5e3846948))
+* do not use member function as event listener ([e77be64](https://github.com/li-yechao/paper-app/commit/e77be6483abbb1b9303c2198669fbf84bd5d1986))
+
+
 ## v1.0.0+5 (2022-10-13)
 
 
