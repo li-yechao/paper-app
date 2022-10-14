@@ -1,10 +1,24 @@
+// Copyright 2022 LiYechao
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 import { ApolloProvider } from '@apollo/client'
 import { css, Global } from '@emotion/react'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { IntlProvider } from 'react-intl'
 import { useSearchParam } from 'react-use'
 import { createClient } from './apollo'
-import ObjectEditor, { ObjectEditorProps, ObjectEditorRef } from './ObjectEditor'
+import ObjectEditor, { ObjectEditorRef } from './ObjectEditor'
 
 export default function App() {
   const apolloClient = useMemo(() => createClient(), [])
@@ -17,51 +31,17 @@ export default function App() {
 
   const editorRef = useRef<ObjectEditorRef>(null)
 
-  const postMessage = useCallback(({ type, data }: { type: string; data: any }) => {
-    window.parent.postMessage({ userId, objectId, type, data })
-  }, [])
+  const methods = useMemo(
+    () => ({
+      save: () => editorRef.current?.save(),
+    }),
+    []
+  )
 
-  const onStateChagne = useCallback<NonNullable<ObjectEditorProps['onStateChange']>>(data => {
+  const { postMessage } = useMessageChannel({ userId, objectId, methods })
+
+  const onStateChagne = useCallback((data: any) => {
     postMessage({ type: 'stateChange', data })
-  }, [])
-
-  const invokeMethodCallback = useCallback(
-    ({ callId, result, error }: { callId: string; result?: any; error?: any }) => {
-      postMessage({ type: 'invokeMethodResult', data: { callId, result, error } })
-    },
-    []
-  )
-
-  const invokeMethod = useCallback(
-    async ({ callId, method }: { callId: string; method: string; arg: any }) => {
-      switch (method) {
-        case 'save': {
-          try {
-            await editorRef.current?.save()
-            invokeMethodCallback({ callId })
-          } catch (error) {
-            invokeMethodCallback({ callId, error })
-          }
-          break
-        }
-      }
-    },
-    []
-  )
-
-  useEffect(() => {
-    window.addEventListener('message', e => {
-      if (e.data?.userId !== userId || e.data?.objectId !== objectId) {
-        return
-      }
-
-      switch (e.data?.type) {
-        case 'invokeMethod': {
-          invokeMethod(e.data.data)
-          break
-        }
-      }
-    })
   }, [])
 
   return (
@@ -89,4 +69,49 @@ export default function App() {
       </IntlProvider>
     </ApolloProvider>
   )
+}
+
+function useMessageChannel({
+  userId,
+  objectId,
+  methods,
+}: {
+  userId: string
+  objectId: string
+  methods: { [method: string]: (arg: any) => Promise<any> | undefined }
+}) {
+  const postMessage = useCallback(
+    ({ type, data }: { type: string; data: any }) => {
+      window.parent.postMessage({ userId, objectId, type, data })
+    },
+    [userId, objectId]
+  )
+
+  useEffect(() => {
+    window.addEventListener('message', async ({ data }) => {
+      if (data?.userId !== userId || data?.objectId !== objectId) {
+        return
+      }
+      switch (data.type) {
+        case 'invokeMethod': {
+          const { callId, method, arg } = data.data || {}
+          let result, error
+          const m = methods[method]
+          if (!m) {
+            error = { message: `No such function ${method}` }
+          } else {
+            try {
+              result = await m(arg)
+            } catch (e) {
+              error = e
+            }
+          }
+          postMessage({ type: 'invokeMethodResult', data: { callId, result, error } })
+          break
+        }
+      }
+    })
+  }, [userId, objectId, methods])
+
+  return { postMessage }
 }
