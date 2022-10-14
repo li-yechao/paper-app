@@ -368,10 +368,7 @@ const EditablePlugin = (props: {
   const input = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    if (!('ontouchstart' in window)) {
-      editor.setEditable(!!props.editable)
-      return
-    }
+    const isMobile = 'ontouchstart' in window
 
     editor.setEditable(false)
 
@@ -404,7 +401,9 @@ const EditablePlugin = (props: {
         return
       }
 
-      input.current?.focus({ preventScroll: true })
+      if (isMobile) {
+        input.current?.focus({ preventScroll: true })
+      }
 
       editor.setEditable(true)
       const range = getMouseEventCaretRange(e)
@@ -415,34 +414,36 @@ const EditablePlugin = (props: {
 
       setTimeout(() => {
         editor.focus()
-        const rect = range!.getBoundingClientRect()
+        if (isMobile) {
+          const rect = range!.getBoundingClientRect()
 
-        const div = document.createElement('div')
-        div.style.width = rect.width + 'px'
-        div.style.height = rect.height + 'px'
-        div.style.position = 'absolute'
-        div.style.left = rect.x + scroller.scrollLeft + 'px'
-        div.style.top = rect.y + scroller.scrollTop + 'px'
-        container.appendChild(div)
-
-        setTimeout(() => {
-          div.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+          const div = document.createElement('div')
+          div.style.width = rect.width + 'px'
+          div.style.height = rect.height + 'px'
+          div.style.position = 'absolute'
+          div.style.left = rect.x + scroller.scrollLeft + 'px'
+          div.style.top = rect.y + scroller.scrollTop + 'px'
+          container.appendChild(div)
 
           setTimeout(() => {
-            div.remove()
-          }, 1000)
-        }, 500)
+            div.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+
+            setTimeout(() => {
+              div.remove()
+            }, 1000)
+          }, 500)
+        }
       })
     }
 
-    dom?.addEventListener('focus', onFocus)
-    dom?.addEventListener('blur', onBlur)
-    dom?.addEventListener('click', onClick)
+    dom.addEventListener('focus', onFocus)
+    dom.addEventListener('blur', onBlur)
+    scroller.addEventListener('click', onClick)
 
     return () => {
-      dom?.removeEventListener('focus', onFocus)
-      dom?.removeEventListener('blur', onBlur)
-      dom?.removeEventListener('click', onClick)
+      dom.removeEventListener('focus', onFocus)
+      dom.removeEventListener('blur', onBlur)
+      scroller.removeEventListener('click', onClick)
     }
   }, [editor, props.editable])
 
@@ -477,10 +478,12 @@ const _EditorContainer = styled.div`
   font-size: 15px;
   line-height: 1.6;
   margin: 16px;
+  /* Make sure container height fills parent for a bouncing effect
+  when the content height is not enough */
+  min-height: calc(100% - 34px);
 
   > .lexical-editor {
     outline: none;
-    min-height: calc(100vh - 32px);
   }
 `
 
