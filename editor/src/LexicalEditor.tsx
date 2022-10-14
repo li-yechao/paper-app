@@ -1,3 +1,17 @@
+// Copyright 2022 LiYechao
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 import styled from '@emotion/styled'
 import { CodeHighlightNode } from '@lexical/code'
 import { AutoLinkNode, LinkNode } from '@lexical/link'
@@ -22,8 +36,16 @@ import {
   TableNode,
   TableRowNode,
 } from '@lexical/table'
-import { $createParagraphNode, EditorState, LexicalNode } from 'lexical'
-import { ChangeEventHandler, ComponentProps, useCallback, useEffect, useMemo, useRef } from 'react'
+import { $createParagraphNode, CLICK_COMMAND, EditorState, LexicalNode } from 'lexical'
+import {
+  ChangeEventHandler,
+  ComponentProps,
+  RefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+} from 'react'
 import BlockQuote from './icons/BlockQuote'
 import BulletList from './icons/BulletList'
 import Code from './icons/Code'
@@ -59,6 +81,8 @@ export interface LexicalEditorProps {
 
 export default function LexicalEditor(props: LexicalEditorProps) {
   const imageInput = useRef<HTMLInputElement>(null)
+  const scroller = useRef<HTMLDivElement>(null)
+  const container = useRef<HTMLDivElement>(null)
 
   const onImageInputChange = useRef<ChangeEventHandler<HTMLInputElement>>()
 
@@ -258,55 +282,56 @@ export default function LexicalEditor(props: LexicalEditorProps) {
 
   return (
     <LexicalComposer initialConfig={initialConfig}>
-      <EditorContainer className={props.className}>
-        <_ImageInput
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={handleImageInputChange}
-          ref={imageInput}
-        />
+      <_ImageInput
+        type="file"
+        accept="image/*"
+        multiple
+        onChange={handleImageInputChange}
+        ref={imageInput}
+      />
 
-        <RichTextPlugin
-          contentEditable={<ContentEditable className="lexical-editor" testid="lexical-editor" />}
-          placeholder={<Placeholder>Input something...</Placeholder>}
-        />
-        {props.onChange && <OnChangePlugin onChange={props.onChange} />}
-        <AutoLinkPlugin matchers={autoLinkMatchers} />
-        <LinkPlugin />
-        <CodeHighlightPlugin />
-        <MarkdownShortcutPlugin transformers={transformers} />
-        <ListPlugin />
-        <CheckListPlugin />
-        <HistoryPlugin />
+      <_Scroller ref={scroller}>
+        <_EditorContainer className={props.className} ref={container}>
+          <RichTextPlugin
+            contentEditable={<ContentEditable className="lexical-editor" testid="lexical-editor" />}
+            placeholder={<Placeholder>Input something...</Placeholder>}
+          />
+          {props.onChange && <OnChangePlugin onChange={props.onChange} />}
+          <AutoLinkPlugin matchers={autoLinkMatchers} />
+          <LinkPlugin />
+          <CodeHighlightPlugin />
+          <MarkdownShortcutPlugin transformers={transformers} />
+          <ListPlugin />
+          <CheckListPlugin />
+          <HistoryPlugin />
 
-        <NoAutoFocusPlugin />
-        <AutoScrollIntoViewPlugin />
-        <EditablePlugin editable={!props.readOnly} />
-        <TrailingParagraphPlugin />
-        <BlockMenuPlugin commands={blockMenuCommands} />
-        <ImagePlugin />
-        <TablePlugin />
-        <TableActionMenuPlugin />
-        <FloatingToolbarPlugin>
-          <ToggleFormatButton type="bold" />
-          <ToggleFormatButton type="italic" />
-          <ToggleFormatButton type="underline" />
-          <ToggleFormatButton type="strikethrough" />
-          <ToggleFormatButton type="code" />
-          <ToggleLinkButton />
-          <ToggleBlockButton type="h1" />
-          <ToggleBlockButton type="h2" />
-          <ToggleBlockButton type="h3" />
-          <ToggleBlockButton type="quote" />
-          <ToggleBlockButton type="ol" />
-          <ToggleBlockButton type="ul" />
+          <NoAutoFocusPlugin />
+          <EditablePlugin scroller={scroller} container={container} editable={!props.readOnly} />
+          <TrailingParagraphPlugin />
+          <BlockMenuPlugin commands={blockMenuCommands} />
+          <ImagePlugin />
+          <TablePlugin />
+          <TableActionMenuPlugin />
+          <FloatingToolbarPlugin>
+            <ToggleFormatButton type="bold" />
+            <ToggleFormatButton type="italic" />
+            <ToggleFormatButton type="underline" />
+            <ToggleFormatButton type="strikethrough" />
+            <ToggleFormatButton type="code" />
+            <ToggleLinkButton />
+            <ToggleBlockButton type="h1" />
+            <ToggleBlockButton type="h2" />
+            <ToggleBlockButton type="h3" />
+            <ToggleBlockButton type="quote" />
+            <ToggleBlockButton type="ol" />
+            <ToggleBlockButton type="ul" />
 
-          <FloatingToolbarPlugin.Extras>
-            <ToggleLinkButton.Extra />
-          </FloatingToolbarPlugin.Extras>
-        </FloatingToolbarPlugin>
-      </EditorContainer>
+            <FloatingToolbarPlugin.Extras>
+              <ToggleLinkButton.Extra />
+            </FloatingToolbarPlugin.Extras>
+          </FloatingToolbarPlugin>
+        </_EditorContainer>
+      </_Scroller>
     </LexicalComposer>
   )
 }
@@ -323,41 +348,106 @@ const NoAutoFocusPlugin = () => {
   return null
 }
 
-const EditablePlugin = ({ editable }: { editable: boolean }) => {
+const EditablePlugin = (props: {
+  scroller: RefObject<HTMLDivElement>
+  container: RefObject<HTMLDivElement>
+  editable?: boolean
+}) => {
   const [editor] = useLexicalComposerContext()
+  const input = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    editor.setEditable(editable)
-  }, [editor, editable])
-
-  return null
-}
-
-const AutoScrollIntoViewPlugin = () => {
-  const [editor] = useLexicalComposerContext()
-
-  useEffect(() => {
-    const dom = editor.getRootElement()
-    const onFocus = () => {
-      setTimeout(() => {
-        const selection = window.getSelection()
-        if (selection && selection.rangeCount > 0) {
-          const { bottom } = selection.getRangeAt(0).getBoundingClientRect()
-          const windowHeight = window.visualViewport?.height || window.innerHeight
-          if (bottom <= 0 || bottom >= windowHeight) {
-            document.documentElement.scrollTop += bottom - windowHeight + windowHeight / 4
-          }
-        }
-      }, 500)
+    if (!('ontouchstart' in window)) {
+      editor.setEditable(!!props.editable)
+      return
     }
-    dom?.addEventListener('focus', onFocus)
-    return () => dom?.removeEventListener('focus', onFocus)
-  }, [editor])
 
-  return null
+    editor.setEditable(false)
+
+    if (!props.editable) {
+      return
+    }
+
+    const scroller = props.scroller.current
+    const container = props.container.current
+    const dom = editor.getRootElement()
+
+    if (!scroller || !container || !dom) {
+      return
+    }
+
+    let editorHasFocus = false
+
+    const onFocus = () => {
+      editorHasFocus = true
+      editor.setEditable(true)
+    }
+
+    const onBlur = () => {
+      editorHasFocus = false
+      editor.setEditable(false)
+    }
+
+    const onClick = (e: MouseEvent) => {
+      if (editorHasFocus) {
+        return
+      }
+
+      input.current?.focus({ preventScroll: true })
+
+      editor.setEditable(true)
+      const range = getMouseEventCaretRange(e)
+      const selection = window.getSelection()
+      selection?.removeAllRanges()
+      selection?.addRange(range!)
+      editor.dispatchCommand(CLICK_COMMAND, e)
+
+      setTimeout(() => {
+        editor.focus()
+        const rect = range!.getBoundingClientRect()
+
+        const div = document.createElement('div')
+        div.style.width = rect.width + 'px'
+        div.style.height = rect.height + 'px'
+        div.style.position = 'absolute'
+        div.style.left = rect.x + scroller.scrollLeft + 'px'
+        div.style.top = rect.y + scroller.scrollTop + 'px'
+        container.appendChild(div)
+
+        setTimeout(() => {
+          div.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+
+          setTimeout(() => {
+            div.remove()
+          }, 1000)
+        }, 500)
+      })
+    }
+
+    dom?.addEventListener('focus', onFocus)
+    dom?.addEventListener('blur', onBlur)
+    dom?.addEventListener('click', onClick)
+
+    return () => {
+      dom?.removeEventListener('focus', onFocus)
+      dom?.removeEventListener('blur', onBlur)
+      dom?.removeEventListener('click', onClick)
+    }
+  }, [editor, props.editable])
+
+  return <_FakeInput ref={input} />
 }
 
-const EditorContainer = styled.div`
+const _Scroller = styled.div`
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+`
+
+const _EditorContainer = styled.div`
   --background-color: #ffffff;
   --app-bar-color: #f2f2f7;
   --color: #000000;
@@ -402,3 +492,32 @@ const Placeholder = styled.div`
   display: inline-block;
   pointer-events: none;
 `
+
+const _FakeInput = styled.input`
+  transform: translate(-9999px, -9999px);
+`
+
+function getMouseEventCaretRange(e: MouseEvent) {
+  const { clientX: x, clientY: y } = e
+
+  if (typeof (e as any).rangeParent != 'undefined') {
+    const range = document.createRange()
+    range.setStart((e as any).rangeParent, (e as any).rangeOffset)
+    range.collapse(true)
+    return range
+  }
+
+  // Try the standards-based way next
+  else if ((document as any).caretPositionFromPoint) {
+    var pos = (document as any).caretPositionFromPoint(x, y)
+    const range = document.createRange()
+    range.setStart(pos.offsetNode, pos.offset)
+    range.collapse(true)
+    return range
+  }
+
+  // Next, the WebKit way
+  else {
+    return document.caretRangeFromPoint(x, y)
+  }
+}

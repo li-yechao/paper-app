@@ -29,8 +29,13 @@ export default function App() {
       <IntlProvider locale={navigator.language}>
         <Global
           styles={css`
-            html {
+            body {
+              position: fixed;
+              overflow: hidden;
               overscroll-behavior: contain;
+              height: 100%;
+              width: 100%;
+              margin: 0;
             }
           `}
         />
