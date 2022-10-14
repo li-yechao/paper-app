@@ -304,7 +304,6 @@ export default function LexicalEditor(props: LexicalEditorProps) {
           <CheckListPlugin />
           <HistoryPlugin />
 
-          <NoAutoFocusPlugin />
           <EditablePlugin scroller={scroller} container={container} editable={!props.readOnly} />
           <TrailingParagraphPlugin />
           <BlockMenuPlugin commands={blockMenuCommands} />
@@ -347,18 +346,6 @@ const OnChangePlugin = ({ onChange }: { onChange: (state: EditorState) => void }
   return null
 }
 
-const NoAutoFocusPlugin = () => {
-  const [editor] = useLexicalComposerContext()
-
-  useEffect(() => {
-    setTimeout(() => {
-      editor.blur()
-    })
-  }, [editor])
-
-  return null
-}
-
 const EditablePlugin = (props: {
   scroller: RefObject<HTMLDivElement>
   container: RefObject<HTMLDivElement>
@@ -393,7 +380,9 @@ const EditablePlugin = (props: {
 
     const onBlur = () => {
       editorHasFocus = false
-      editor.setEditable(false)
+      if (isMobile) {
+        editor.setEditable(false)
+      }
     }
 
     const onClick = (e: MouseEvent) => {
