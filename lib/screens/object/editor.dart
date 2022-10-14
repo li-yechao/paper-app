@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
-class Editor extends StatelessWidget {
+class Editor extends StatefulWidget {
   const Editor({
     Key? key,
     required this.userId,
@@ -13,6 +13,13 @@ class Editor extends StatelessWidget {
   final String objectId;
   final ValueNotifier<bool?>? changed;
   final ValueNotifier<bool>? loaded;
+
+  @override
+  State<Editor> createState() => EditorState();
+}
+
+class EditorState extends State<Editor> {
+  Future<void> save() async {}
 
   @override
   Widget build(BuildContext context) {
