@@ -33,40 +33,42 @@ class CorrectViewInsets extends StatefulWidget {
 class _CorrectViewInsetsState extends State<CorrectViewInsets> {
   double _viewInsetsBottom = 0;
 
-  _onResize(Event e) {
-    _calcViewInsets();
-  }
+  late final Function(Event) _onResize;
 
   @override
   void initState() {
     super.initState();
+
+    _onResize = (e) {
+      _timer?.cancel();
+      _timer = Timer.periodic(const Duration(milliseconds: 100), (Timer timer) {
+        document.documentElement?.scrollTop = 0;
+        final windowInnerHeight = window.innerHeight!.toDouble();
+        final visualHeight = window.visualViewport!.height!.toDouble();
+
+        setState(() {
+          _viewInsetsBottom = windowInnerHeight - visualHeight;
+        });
+
+        if (timer.tick >= 10) {
+          _timer?.cancel();
+          _timer = null;
+        }
+      });
+    };
+
     window.visualViewport?.addEventListener('resize', _onResize, true);
   }
 
   @override
   void dispose() {
     window.visualViewport?.removeEventListener('resize', _onResize, true);
+    _timer?.cancel();
+    _timer = null;
     super.dispose();
   }
 
   Timer? _timer;
-
-  _calcViewInsets() {
-    _timer ??= Timer.periodic(const Duration(milliseconds: 100), (Timer timer) {
-      document.documentElement?.scrollTop = 0;
-      final windowInnerHeight = window.innerHeight!.toDouble();
-      final visualHeight = window.visualViewport!.height!.toDouble();
-
-      setState(() {
-        _viewInsetsBottom = windowInnerHeight - visualHeight;
-      });
-
-      if (timer.tick >= 10) {
-        _timer?.cancel();
-        _timer = null;
-      }
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
