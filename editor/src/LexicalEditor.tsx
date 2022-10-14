@@ -26,7 +26,6 @@ import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin'
 import { LinkPlugin } from '@lexical/react/LexicalLinkPlugin'
 import { ListPlugin } from '@lexical/react/LexicalListPlugin'
 import { MarkdownShortcutPlugin } from '@lexical/react/LexicalMarkdownShortcutPlugin'
-import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin'
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin'
 import { TablePlugin } from '@lexical/react/LexicalTablePlugin'
 import { $createHeadingNode, $createQuoteNode, HeadingNode, QuoteNode } from '@lexical/rich-text'
@@ -334,6 +333,18 @@ export default function LexicalEditor(props: LexicalEditorProps) {
       </_Scroller>
     </LexicalComposer>
   )
+}
+
+const OnChangePlugin = ({ onChange }: { onChange: (state: EditorState) => void }) => {
+  const [editor] = useLexicalComposerContext()
+
+  useEffect(() => {
+    return editor.registerUpdateListener(({ editorState }) => {
+      onChange(editorState)
+    })
+  }, [editor])
+
+  return null
 }
 
 const NoAutoFocusPlugin = () => {
