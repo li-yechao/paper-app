@@ -395,16 +395,22 @@ const EditablePlugin = (props: {
       }
 
       editor.setEditable(true)
-      const range = getMouseEventCaretRange(e)
+      const range = getMouseEventCaretRange(e)!
       const selection = window.getSelection()
       selection?.removeAllRanges()
-      selection?.addRange(range!)
+      selection?.addRange(range)
       editor.dispatchCommand(CLICK_COMMAND, e)
 
       setTimeout(() => {
         editor.focus()
         if (isMobile) {
-          const rect = range!.getBoundingClientRect()
+          const rect =
+            range.startOffset === 0 && range.endOffset === 0
+              ? (range.startContainer as Element)?.getBoundingClientRect()
+              : range.getBoundingClientRect()
+          if (!rect) {
+            return
+          }
 
           const div = document.createElement('div')
           div.style.width = rect.width + 'px'
