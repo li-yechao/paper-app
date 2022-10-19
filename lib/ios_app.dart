@@ -18,7 +18,9 @@ class IosApp extends HookConsumerWidget {
     final client = useGraphQLClient();
 
     useEffect(() {
-      ref.read(authStateProvider.notifier).refresh(client);
+      // Refresh authorized user data.
+      // Run it in a Timer to avoid the exception about call setState in build.
+      Timer.run(() => ref.read(authStateProvider.notifier).refresh(client));
       return null;
     }, []);
 
