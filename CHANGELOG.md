@@ -1,3 +1,11 @@
+## v1.0.0+8 (2022-10-19)
+
+
+### Bug Fixes
+
+* remove debug code ([baf0c7c](https://github.com/li-yechao/paper-app/commit/baf0c7cf6f665a54eb5608b312a840de28290284))
+
+
 ## v1.0.0+7 (2022-10-19)
 
 
