@@ -416,20 +416,20 @@ const EditablePlugin = (props: {
           editor.focus()
         }
         if (isMobile) {
-          const rect =
-            range.startOffset === 0 && range.endOffset === 0
-              ? (range.startContainer as Element)?.getBoundingClientRect()
-              : range.getBoundingClientRect()
-          if (!rect) {
-            return
+          let rect = range.getBoundingClientRect()
+          if (rect.x === 0 && rect.y === 0) {
+            rect = (range.startContainer as Element).getBoundingClientRect?.()
+            if (!rect) {
+              return
+            }
           }
 
           const div = document.createElement('div')
-          div.style.width = rect.width + 'px'
-          div.style.height = rect.height + 'px'
+          div.style.width = '1px'
+          div.style.height = '1.6em'
           div.style.position = 'absolute'
-          div.style.left = rect.x + scroller.scrollLeft + 'px'
-          div.style.top = rect.y + scroller.scrollTop + 'px'
+          div.style.left = rect.x + scroller.scrollLeft - 16 + 'px'
+          div.style.top = rect.y + scroller.scrollTop - 16 + 'px'
           container.appendChild(div)
 
           setTimeout(() => {
