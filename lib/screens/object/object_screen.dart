@@ -1,8 +1,12 @@
+// ignore: avoid_web_libraries_in_flutter
+import 'dart:html';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:paper/state/auth.dart';
 import 'package:paper/widgets/correct_view_insets.dart';
+import 'package:pointer_interceptor/pointer_interceptor.dart';
 
 import 'editor.dart' if (dart.library.html) 'editor_web.dart';
 
@@ -28,12 +32,14 @@ class ObjectScreen extends HookConsumerWidget {
     final loaded = useState(false);
 
     return WillPopScope(
-      onWillPop: () async {
-        if (changed.value == true) {
-          await editor.currentState?.save();
-        }
-        return true;
-      },
+      onWillPop: 1 > 0 //changed.value != true
+          ? null
+          : () async {
+              if (changed.value == true) {
+                await editor.currentState?.save();
+              }
+              return true;
+            },
       child: CorrectViewInsets(
         child: CupertinoPageScaffold(
           navigationBar: CupertinoNavigationBar(
@@ -77,9 +83,43 @@ class ObjectScreen extends HookConsumerWidget {
                     ),
                   ),
                 ),
+                if (user != null) const SwipeBackGap(),
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class SwipeBackGap extends HookWidget {
+  const SwipeBackGap({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final touching = useState(false);
+
+    useEffect(() {
+      listener(e) {
+        touching.value = false;
+      }
+
+      window.addEventListener('touchend', listener, true);
+      return () => window.addEventListener('touchend', listener, true);
+    }, []);
+
+    return Positioned(
+      left: 0,
+      top: 0,
+      bottom: 0,
+      width: touching.value ? null : 12.0,
+      right: touching.value ? 0 : null,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onPanDown: (e) => touching.value = touching.value != true,
+        child: PointerInterceptor(
+          child: Container(),
         ),
       ),
     );
