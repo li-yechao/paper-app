@@ -371,17 +371,25 @@ const EditablePlugin = (props: {
       return
     }
 
+    if (isMobile) {
+      dom.style.pointerEvents = 'pan-x pan-y'
+    }
+
     let editorHasFocus = false
 
     const onFocus = () => {
       editorHasFocus = true
       editor.setEditable(true)
+      if (isMobile) {
+        dom.style.pointerEvents = 'all'
+      }
     }
 
     const onBlur = () => {
       editorHasFocus = false
       if (isMobile) {
         editor.setEditable(false)
+        dom.style.pointerEvents = 'pan-x pan-y'
       }
     }
 
