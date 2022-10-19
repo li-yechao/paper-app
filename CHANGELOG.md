@@ -1,3 +1,20 @@
+## v1.0.0+7 (2022-10-19)
+
+
+### Bug Fixes
+
+* avoid scroll when content height is not enough ([0341cf4](https://github.com/li-yechao/paper-app/commit/0341cf4de3d730f83756bfcf01ca384aa97c32e0))
+* editor not focused when click on the bottom of the blank paper ([6e9af1e](https://github.com/li-yechao/paper-app/commit/6e9af1e8d59a69af4cca193524f750dca6d1d209))
+* ensure the height of the content is sufficient for a bounce scrolling effect ([7ddf551](https://github.com/li-yechao/paper-app/commit/7ddf551b344e3145b807827d83e382712a29fa08))
+* ignore mouse events when the editor is not focused ([e35e0aa](https://github.com/li-yechao/paper-app/commit/e35e0aa968aa884780c37ef008d233bb9f1f6705))
+* maintain focus status in desktop browser ([9f5b622](https://github.com/li-yechao/paper-app/commit/9f5b622e86905a7dfe22175d7f7da868697a01d6))
+* run refresh in a timer to avoid the exception about call setState in build ([15a24e0](https://github.com/li-yechao/paper-app/commit/15a24e0440bc721d686534da59cb98cd240cdc82))
+* scroll into view when focus is on the beginning of a line ([a6cdf81](https://github.com/li-yechao/paper-app/commit/a6cdf8159e0cd6cdb58700419d2a3f357a305778))
+* support swipe back for the editor page ([3d277cf](https://github.com/li-yechao/paper-app/commit/3d277cf2fcca4f35cbe769405f0b81e423623ac6))
+* the screen scrolls up when dom.focus is called with non-empty content ([1b627ca](https://github.com/li-yechao/paper-app/commit/1b627cae0e1d7571587724af2bea4eb90ec35610))
+* use the rect of startContainer if range is at the beginning of a empty line ([51dec30](https://github.com/li-yechao/paper-app/commit/51dec30ccc9118d187db65d71b2618e16bf456c3))
+
+
 ## v1.0.0+6 (2022-10-14)
 
 
