@@ -410,7 +410,11 @@ const EditablePlugin = (props: {
       editor.dispatchCommand(CLICK_COMMAND, e)
 
       setTimeout(() => {
-        dom.focus()
+        if (editor.getEditorState().isEmpty()) {
+          dom.focus()
+        } else {
+          editor.focus()
+        }
         if (isMobile) {
           const rect =
             range.startOffset === 0 && range.endOffset === 0
