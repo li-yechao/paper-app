@@ -32,7 +32,7 @@ class ObjectScreen extends HookConsumerWidget {
     final loaded = useState(false);
 
     return WillPopScope(
-      onWillPop: 1 > 0 //changed.value != true
+      onWillPop: changed.value != true
           ? null
           : () async {
               if (changed.value == true) {
