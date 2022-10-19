@@ -1074,7 +1074,7 @@ $$`})]})}const pB=Xe.span`
   margin: 16px;
   /* Make sure container height fills parent for a bouncing effect
   when the content height is not enough */
-  min-height: calc(100% - 34px);
+  min-height: calc(100%);
 
   > .lexical-editor {
     outline: none;
