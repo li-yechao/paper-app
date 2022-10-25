@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import styled from '@emotion/styled'
+import { GrammarlyEditorPlugin } from '@grammarly/editor-sdk-react'
 import { CodeHighlightNode } from '@lexical/code'
 import { AutoLinkNode, LinkNode } from '@lexical/link'
 import { $createListItemNode, $createListNode, ListItemNode, ListNode } from '@lexical/list'
@@ -45,6 +46,7 @@ import {
   useMemo,
   useRef,
 } from 'react'
+import { GRAMMARLY_CLIENT_ID } from './constants'
 import BlockQuote from './icons/BlockQuote'
 import BulletList from './icons/BulletList'
 import Code from './icons/Code'
@@ -291,10 +293,14 @@ export default function LexicalEditor(props: LexicalEditorProps) {
 
       <_Scroller ref={scroller}>
         <_EditorContainer className={props.className} ref={container}>
-          <RichTextPlugin
-            contentEditable={<ContentEditable className="lexical-editor" testid="lexical-editor" />}
-            placeholder={<Placeholder>Input something...</Placeholder>}
-          />
+          <GrammarlyEditorPlugin clientId={GRAMMARLY_CLIENT_ID}>
+            <RichTextPlugin
+              contentEditable={
+                <ContentEditable className="lexical-editor" testid="lexical-editor" />
+              }
+              placeholder={<Placeholder>Input something...</Placeholder>}
+            />
+          </GrammarlyEditorPlugin>
           {props.onChange && <OnChangePlugin onChange={props.onChange} />}
           <AutoLinkPlugin matchers={autoLinkMatchers} />
           <LinkPlugin />
@@ -489,7 +495,7 @@ const _EditorContainer = styled.div`
   when the content height is not enough */
   min-height: calc(100%);
 
-  > .lexical-editor {
+  .lexical-editor {
     outline: none;
   }
 `

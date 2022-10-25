@@ -464,6 +464,18 @@
     intl-messageformat "10.1.4"
     tslib "2.4.0"
 
+"@grammarly/editor-sdk-react@^2.0.6":
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/@grammarly/editor-sdk-react/-/editor-sdk-react-2.0.6.tgz#ec52f83549e67c45cfe647b40ae51d9fea5fc37b"
+  integrity sha512-kR55gkRIx+0Odvnl1Nuu2cTO8c4REIbIXtbeh6HOZWTBpbJUSrOpVn95HEiJvU3mtyKzrq3Lo4iAOBDKUw7WUg==
+  dependencies:
+    "@grammarly/editor-sdk" "2.0.6"
+
+"@grammarly/editor-sdk@2.0.6":
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/@grammarly/editor-sdk/-/editor-sdk-2.0.6.tgz#c9bb24fa045751f6f1e6d3d5fd9a9d7c71ad14db"
+  integrity sha512-Acw0ivsrcA5NIs+EwMMrGJDj1+df2/xfq+taLaAV0VHepXdoik+6/ceqF2c4VpQZk2sGT4k7sVeS+LQ5IfRrrQ==
+
 "@graphql-typed-document-node/core@^3.1.1":
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/@graphql-typed-document-node/core/-/core-3.1.1.tgz#076d78ce99822258cf813ecc1e7fa460fa74d052"

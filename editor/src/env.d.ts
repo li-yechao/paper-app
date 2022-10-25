@@ -17,6 +17,7 @@ interface ImportMetaEnv extends Readonly<Record<string, string | boolean>> {
   PROD: boolean
 
   VITE_GRAPHQL_URI: string
+  VITE_GRAMMARLY_CLIENT_ID: string
 }
 
 interface ImportMeta {

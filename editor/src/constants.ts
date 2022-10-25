@@ -13,3 +13,5 @@
 // limitations under the License.
 
 export const GRAPHQL_URI = import.meta.env.VITE_GRAPHQL_URI
+
+export const GRAMMARLY_CLIENT_ID = import.meta.env.VITE_GRAMMARLY_CLIENT_ID
