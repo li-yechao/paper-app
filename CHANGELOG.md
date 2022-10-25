@@ -1,3 +1,11 @@
+## v1.0.0+9 (2022-10-25)
+
+
+### Features
+
+* embedded grammarly plugin ([81d3745](https://github.com/li-yechao/paper-app/commit/81d37459b42c21505248d41578ca271b400b827e))
+
+
 ## v1.0.0+8 (2022-10-19)
 
 
